@@ -7,7 +7,12 @@ var x,y;
     var puzzle;
     var cell;
 var draggetImg=null;
-     
+var info=[];
+var ajaxHandlerScript="https://fe.it-academy.by/AjaxStringStorage2.php";
+
+            var updatePassword;
+            var stringName='S_TEST';
+            updatePassword=Math.random();
 $.ajax({
     url :ajaxHandlerScript, type : 'POST', cache : false, dataType:'json',
     data : { f : 'READ' ,n : stringName, },
@@ -34,16 +39,16 @@ $.ajax({
     if ( callresult.error!=undefined )
     alert(callresult.error);
     else {
-      var a=prompt('Введите название');
-            
+      var a=prompt('Вы выйграли. Введите Ваше имя:');
+    }   
       if(a) {
         a=a.replace(/^\s*|\s(?=\s)/g,'');
         if(a){
-          animateClef();
-          info[a]=save;
+          
+          info.push(a);
         }
       }
-    }
+  
     $.ajax( {
       url :ajaxHandlerScript, type : 'POST', cache : false, dataType:'json',
       data : { f : 'UPDATE',  n : stringName, v : JSON.stringify(info),  p : updatePassword },
@@ -83,38 +88,9 @@ function dragEnd (EO) {
         }
     }
     if (table.length==length) {
-        let nameUser;
-        nameUser=prompt('Вы выйграли! Введите свое имя:')}
-     
-        loadData=()=> {
-            var ajaxHandlerScript="https://fe.it-academy.by/AjaxStringStorage2.php";
-            var updatePassword;
-            var stringName='S_TEST';
-            updatePassword=Math.random();
-            $.ajax( {
-                    url : ajaxHandlerScript, type : 'POST', cache : false, dataType:'json',
-                    data : { f : 'LOCKGET', n : stringName, p : updatePassword },
-                    success : lockGetReady, error : errorHandler
-                }
-            );
-          }
-
-          function lockGetReady(callresult) {
-           
-                $.ajax( {
-                        url : ajaxHandlerScript, type : 'POST', cache : false, dataType:'json',
-                        data : { f : 'UPDATE', n : stringName, v : JSON.stringify(nameUser), p : updatePassword },
-                        success : updateReady, error : errorHandler
-                    }
-                );
-            }
-        
-            
-function updateReady(callresult) {
-    if ( callresult.error!=undefined )
-        alert(callresult.error);
+      
+        getInfo();
 }
-          loadData();
 }
 
 function divDrop(EO){
@@ -246,25 +222,52 @@ function switchToStateFromURLHash() {
         
         break;
         case 'Records':
-            var ajaxHandlerScript="https://fe.it-academy.by/AjaxStringStorage2.php";
-            var stringName='STORAGE';
-         
-            $.ajax({
-               url :ajaxHandlerScript, type : 'POST', cache : false, dataType:'json',
-               data : { f : 'READ' ,n : stringName, },
-               success : readReady, error : errorHandler
-             } );
-            function readReady(callresult) {
-              if ( callresult.error!=undefined )
-               alert(callresult.error);
-              else  {
-             
-                info=JSON.parse(callresult.result);
-                drawMusic( info);
-               }
-             }
-            pageHTML+='<h2>Список рекордов</h2> <div id="nameUser"></div>';
-            document.body.innerHTML=pageHTML;
+            
+    var ajaxHandlerScript="https://fe.it-academy.by/AjaxStringStorage2.php";
+    var stringName='S_TEST';
+ 
+    $.ajax({
+       url :ajaxHandlerScript, type : 'POST', cache : false, dataType:'json',
+       data : { f : 'READ' ,n : stringName, },
+       success : readReady, error : errorHandler
+     } );
+    function readReady(callresult) {
+      if ( callresult.error!=undefined )
+       alert(callresult.error);
+      else  {
+     
+        info=JSON.parse(callresult.result);
+        drawList( info);
+       }
+     };
+
+    function drawList () {
+       
+      var list= document.createElement('div');
+      list.style.paddingTop='50px';
+     document.body.appendChild(list);
+     var title=document.createElement('span');
+     title.innerText='Список рекордов';
+     list.innerHTML=title;
+
+     for(var k in info) {
+      var username;
+      username=document.createElement('span');
+      username.style.marginLeft='20px';
+      username.style.fontSize='22px';
+      username.style.lineHeight='27px';
+      username.innerHTML=k+'<br>';
+      list.appendChild(username);
+     };
+
+     }
+     document.body.innerHTML=pageHTML;
+     window.onresize= function() {
+        document.body.innerHTML= "<input type=button value='Главная' onclick='switchToMainPage()'> <input type=button value='Рекорды' onclick='switchToRecordsPage()'>  <input type=button value='Настройки' onclick='switchToSettingsPage()'>";
+
+       drawList();
+      }
+           
             break;
             case 'Settings':
                 pageHTML+='<h2>Выберите картинку</h2>';
